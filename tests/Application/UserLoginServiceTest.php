@@ -49,12 +49,25 @@ final class UserLoginServiceTest extends TestCase
     public function testGetNumberOfSessions()
     {
         $facebookSessionManager = Mockery::mock(FacebookSessionManager::class);
-        $facebookSessionManager->shouldReceive('getSessions')
-            ->once()
-            ->andReturn(4);
+        $facebookSessionManager->shouldReceive('getSessions')->andReturn(4);
 
         $userLoginService = new UserLoginService($facebookSessionManager);
 
         $this->assertEquals(4, $userLoginService->getExternalSession());
+    }
+
+    /**
+     * @test
+     */
+    public function logoutUser()
+    {
+        $facebookSessionManager = Mockery::spy(FacebookSessionManager::class);
+        $facebookSessionManager->shouldReceive('logout')->andReturn("Ok");
+
+        $userLoginService = new UserLoginService($facebookSessionManager);
+        $user = new User("Asier");
+        $userLoginService->manualLogin($user);
+        $this->assertEquals("Ok", $userLoginService->logout($user));
+        $facebookSessionManager->shouldHaveReceived('logout')->once();
     }
 }
